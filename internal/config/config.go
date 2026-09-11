@@ -11,8 +11,11 @@ import (
 type Config struct {
 	Addr            string
 	DatabaseURL     string
+	Strategy        string
 	MaxConns        int32
 	HoldTTL         time.Duration
+	ExpireEvery     time.Duration
+	ExpireBatch     int
 	ShutdownTimeout time.Duration
 	LogLevel        slog.Level
 }
@@ -33,6 +36,16 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
+	expireEvery, err := envDuration("EXPIRE_EVERY", 10*time.Second)
+	if err != nil {
+		return Config{}, err
+	}
+
+	expireBatch, err := envInt("EXPIRE_BATCH", 100)
+	if err != nil {
+		return Config{}, err
+	}
+
 	shutdown, err := envDuration("SHUTDOWN_TIMEOUT", 10*time.Second)
 	if err != nil {
 		return Config{}, err
@@ -48,8 +61,11 @@ func Load() (Config, error) {
 	return Config{
 		Addr:            envString("API_ADDR", ":8080"),
 		DatabaseURL:     url,
+		Strategy:        envString("BOOKING_STRATEGY", "pessimistic"),
 		MaxConns:        int32(maxConns),
 		HoldTTL:         holdTTL,
+		ExpireEvery:     expireEvery,
+		ExpireBatch:     expireBatch,
 		ShutdownTimeout: shutdown,
 		LogLevel:        level,
 	}, nil

@@ -1,0 +1,149 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /scripts/hot_seat.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 50 max VUs, 1m0s max duration (incl. graceful stop):
+              * hot_seat: 50 looping VUs for 30s (gracefulStop: 30s)
+
+
+running (0m01.0s), 50/50 VUs, 6281 complete and 0 interrupted iterations
+hot_seat   [   3% ] 50 VUs  01.0s/30s
+
+running (0m02.0s), 50/50 VUs, 14383 complete and 0 interrupted iterations
+hot_seat   [   7% ] 50 VUs  02.0s/30s
+
+running (0m03.0s), 50/50 VUs, 22513 complete and 0 interrupted iterations
+hot_seat   [  10% ] 50 VUs  03.0s/30s
+
+running (0m04.0s), 50/50 VUs, 30443 complete and 0 interrupted iterations
+hot_seat   [  13% ] 50 VUs  04.0s/30s
+
+running (0m05.0s), 50/50 VUs, 37839 complete and 0 interrupted iterations
+hot_seat   [  17% ] 50 VUs  05.0s/30s
+
+running (0m06.0s), 50/50 VUs, 46093 complete and 0 interrupted iterations
+hot_seat   [  20% ] 50 VUs  06.0s/30s
+
+running (0m07.0s), 50/50 VUs, 54341 complete and 0 interrupted iterations
+hot_seat   [  23% ] 50 VUs  07.0s/30s
+
+running (0m08.0s), 50/50 VUs, 61813 complete and 0 interrupted iterations
+hot_seat   [  27% ] 50 VUs  08.0s/30s
+
+running (0m09.0s), 50/50 VUs, 69904 complete and 0 interrupted iterations
+hot_seat   [  30% ] 50 VUs  09.0s/30s
+
+running (0m10.0s), 50/50 VUs, 78005 complete and 0 interrupted iterations
+hot_seat   [  33% ] 50 VUs  10.0s/30s
+
+running (0m11.0s), 50/50 VUs, 85718 complete and 0 interrupted iterations
+hot_seat   [  37% ] 50 VUs  11.0s/30s
+
+running (0m12.0s), 50/50 VUs, 93988 complete and 0 interrupted iterations
+hot_seat   [  40% ] 50 VUs  12.0s/30s
+
+running (0m13.0s), 50/50 VUs, 102066 complete and 0 interrupted iterations
+hot_seat   [  43% ] 50 VUs  13.0s/30s
+
+running (0m14.0s), 50/50 VUs, 110122 complete and 0 interrupted iterations
+hot_seat   [  47% ] 50 VUs  14.0s/30s
+
+running (0m15.0s), 50/50 VUs, 118234 complete and 0 interrupted iterations
+hot_seat   [  50% ] 50 VUs  15.0s/30s
+
+running (0m16.0s), 50/50 VUs, 125540 complete and 0 interrupted iterations
+hot_seat   [  53% ] 50 VUs  16.0s/30s
+
+running (0m17.0s), 50/50 VUs, 133778 complete and 0 interrupted iterations
+hot_seat   [  57% ] 50 VUs  17.0s/30s
+
+running (0m18.0s), 50/50 VUs, 142086 complete and 0 interrupted iterations
+hot_seat   [  60% ] 50 VUs  18.0s/30s
+
+running (0m19.0s), 50/50 VUs, 150272 complete and 0 interrupted iterations
+hot_seat   [  63% ] 50 VUs  19.0s/30s
+
+running (0m20.0s), 50/50 VUs, 158488 complete and 0 interrupted iterations
+hot_seat   [  67% ] 50 VUs  20.0s/30s
+
+running (0m21.0s), 50/50 VUs, 166220 complete and 0 interrupted iterations
+hot_seat   [  70% ] 50 VUs  21.0s/30s
+
+running (0m22.0s), 50/50 VUs, 174500 complete and 0 interrupted iterations
+hot_seat   [  73% ] 50 VUs  22.0s/30s
+
+running (0m23.0s), 50/50 VUs, 182720 complete and 0 interrupted iterations
+hot_seat   [  77% ] 50 VUs  23.0s/30s
+
+running (0m24.0s), 50/50 VUs, 190971 complete and 0 interrupted iterations
+hot_seat   [  80% ] 50 VUs  24.0s/30s
+
+running (0m25.0s), 50/50 VUs, 199157 complete and 0 interrupted iterations
+hot_seat   [  83% ] 50 VUs  25.0s/30s
+
+running (0m26.0s), 50/50 VUs, 207415 complete and 0 interrupted iterations
+hot_seat   [  87% ] 50 VUs  26.0s/30s
+
+running (0m27.0s), 50/50 VUs, 214845 complete and 0 interrupted iterations
+hot_seat   [  90% ] 50 VUs  27.0s/30s
+
+running (0m28.0s), 50/50 VUs, 222970 complete and 0 interrupted iterations
+hot_seat   [  93% ] 50 VUs  28.0s/30s
+
+running (0m29.0s), 50/50 VUs, 231054 complete and 0 interrupted iterations
+hot_seat   [  97% ] 50 VUs  29.0s/30s
+
+running (0m30.0s), 50/50 VUs, 239331 complete and 0 interrupted iterations
+hot_seat   [ 100% ] 50 VUs  30.0s/30s
+
+
+  █ THRESHOLDS 
+
+    booking_failed
+    ✓ 'count==0' count=0
+
+    http_req_duration
+    ✓ 'p(95)<1000' p(95)=8.47ms
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 239496  7981.526318/s
+    checks_succeeded...: 100.00% 239496 out of 239496
+    checks_failed......: 0.00%   0 out of 239496
+
+    ✓ settled as 201 or 409
+
+    CUSTOM
+    booking_conflicted.............: 239465 7980.493202/s
+    booking_failed.................: 0      0/s
+    booking_won....................: 31     1.033117/s
+
+    HTTP
+    http_req_duration..............: avg=6.23ms min=835.66µs med=6.54ms max=62ms    p(90)=7.68ms p(95)=8.47ms
+      { expected_response:true }...: avg=6.23ms min=835.66µs med=6.54ms max=62ms    p(90)=7.68ms p(95)=8.47ms
+    http_req_failed................: 0.00%  0 out of 239496
+    http_reqs......................: 239496 7981.526318/s
+
+    EXECUTION
+    iteration_duration.............: avg=6.26ms min=878.12µs med=6.56ms max=64.51ms p(90)=7.71ms p(95)=8.51ms
+    iterations.....................: 239496 7981.526318/s
+    vus............................: 50     min=50          max=50
+    vus_max........................: 50     min=50          max=50
+
+    NETWORK
+    data_received..................: 41 MB  1.4 MB/s
+    data_sent......................: 41 MB  1.4 MB/s
+
+
+
+
+running (0m30.0s), 00/50 VUs, 239496 complete and 0 interrupted iterations
+hot_seat ✓ [ 100% ] 50 VUs  30s

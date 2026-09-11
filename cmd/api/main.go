@@ -15,6 +15,7 @@ import (
 	"github.com/tomq29/highload-ticket-booking/internal/booking"
 	"github.com/tomq29/highload-ticket-booking/internal/config"
 	"github.com/tomq29/highload-ticket-booking/internal/httpapi"
+	"github.com/tomq29/highload-ticket-booking/internal/metrics"
 	"github.com/tomq29/highload-ticket-booking/internal/postgres"
 )
 
@@ -78,11 +79,27 @@ func run() error {
 	}
 	defer pool.Close()
 
-	service := booking.NewService(postgres.NewRepository(pool), cfg.HoldTTL)
+	repo, err := postgres.NewRepository(pool, postgres.Strategy(cfg.Strategy))
+	if err != nil {
+		return err
+	}
+	service := booking.NewService(repo, cfg.HoldTTL)
+
+	probes := metrics.New(cfg.Strategy)
+	probes.Register(metrics.NewPoolCollector(pool))
+
+	expirer := booking.NewExpirer(repo, cfg.ExpireEvery, cfg.ExpireBatch, log)
+	go expirer.Run(ctx)
 
 	srv := &http.Server{
-		Addr:              cfg.Addr,
-		Handler:           httpapi.New(service, pool.Ping, log),
+		Addr: cfg.Addr,
+		Handler: httpapi.New(httpapi.Config{
+			Service: service,
+			Ready:   pool.Ping,
+			Metrics: probes,
+			Scrape:  probes.Handler(),
+			Logger:  log,
+		}),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,
@@ -91,7 +108,7 @@ func run() error {
 
 	serveErr := make(chan error, 1)
 	go func() {
-		log.Info("listening", "addr", cfg.Addr)
+		log.Info("listening", "addr", cfg.Addr, "strategy", cfg.Strategy, "hold_ttl", cfg.HoldTTL.String())
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serveErr <- err
 		}

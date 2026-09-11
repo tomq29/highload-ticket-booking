@@ -1,4 +1,4 @@
-.PHONY: up down logs test lint build run
+.PHONY: up down logs test lint build run seed-load load load-hot load-spread
 
 up:
 	docker compose up --build -d
@@ -22,3 +22,15 @@ lint:
 
 run:
 	DATABASE_URL=postgres://booking:booking@localhost:$${POSTGRES_PORT:-5432}/booking?sslmode=disable go run ./cmd/api
+
+seed-load:
+	docker compose exec -T db psql -q -U booking -d booking < loadtest/setup.sql
+
+load-hot: seed-load
+	docker compose run --rm k6 run /scripts/hot_seat.js
+
+load-spread: seed-load
+	docker compose run --rm k6 run /scripts/spread.js
+
+load:
+	./loadtest/bench.sh

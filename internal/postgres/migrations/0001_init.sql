@@ -50,6 +50,12 @@ CREATE UNIQUE INDEX bookings_one_live_per_seat
 
 CREATE INDEX bookings_expiring ON bookings (expires_at) WHERE status = 'held';
 
+-- Postgres does not index the referencing side of a foreign key on its own,
+-- and the unique index above covers live bookings only. Without this one,
+-- touching a seat row makes the database scan every booking ever made to
+-- prove the seat is not referenced.
+CREATE INDEX bookings_seat ON bookings (seat_id, event_id);
+
 -- +goose Down
 DROP TABLE bookings;
 DROP TYPE booking_status;
