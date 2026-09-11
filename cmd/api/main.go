@@ -12,11 +12,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/tomq29/highload-ticket-booking/internal/booking"
 	"github.com/tomq29/highload-ticket-booking/internal/config"
+	"github.com/tomq29/highload-ticket-booking/internal/httpapi"
 	"github.com/tomq29/highload-ticket-booking/internal/postgres"
-	ticketsHandler "github.com/tomq29/highload-ticket-booking/internal/tickets/handler"
-	ticketsRepo "github.com/tomq29/highload-ticket-booking/internal/tickets/repo"
-	ticketsService "github.com/tomq29/highload-ticket-booking/internal/tickets/service"
 )
 
 func main() {
@@ -28,11 +27,8 @@ func main() {
 		os.Exit(probe())
 	}
 
-	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(log)
-
-	if err := run(log); err != nil {
-		log.Error("server stopped", "error", err)
+	if err := run(); err != nil {
+		slog.Error("server stopped", "error", err)
 		os.Exit(1)
 	}
 }
@@ -60,11 +56,14 @@ func probe() int {
 	return 0
 }
 
-func run(log *slog.Logger) error {
+func run() error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
 	}
+
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: cfg.LogLevel}))
+	slog.SetDefault(log)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -79,24 +78,11 @@ func run(log *slog.Logger) error {
 	}
 	defer pool.Close()
 
-	handler := ticketsHandler.NewTicketsHandler(ticketsService.NewTicketService(ticketsRepo.NewTicketRepo(pool)))
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /book", handler.PostBook)
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) {
-		if err := pool.Ping(r.Context()); err != nil {
-			http.Error(w, "database unavailable", http.StatusServiceUnavailable)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-	})
+	service := booking.NewService(postgres.NewRepository(pool), cfg.HoldTTL)
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,
-		Handler:           mux,
+		Handler:           httpapi.New(service, pool.Ping, log),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,

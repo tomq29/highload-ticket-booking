@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"time"
@@ -13,6 +14,7 @@ type Config struct {
 	MaxConns        int32
 	HoldTTL         time.Duration
 	ShutdownTimeout time.Duration
+	LogLevel        slog.Level
 }
 
 func Load() (Config, error) {
@@ -36,12 +38,20 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
+	var level slog.Level
+	if raw := os.Getenv("LOG_LEVEL"); raw != "" {
+		if err := level.UnmarshalText([]byte(raw)); err != nil {
+			return Config{}, fmt.Errorf("LOG_LEVEL: %w", err)
+		}
+	}
+
 	return Config{
 		Addr:            envString("API_ADDR", ":8080"),
 		DatabaseURL:     url,
 		MaxConns:        int32(maxConns),
 		HoldTTL:         holdTTL,
 		ShutdownTimeout: shutdown,
+		LogLevel:        level,
 	}, nil
 }
 
