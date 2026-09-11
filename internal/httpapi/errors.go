@@ -15,6 +15,27 @@ type errorResponse struct {
 	Message string `json:"message"`
 }
 
+// outcomeFor is the label the booking counter carries: a conflict is the
+// service working as intended, a rejection is the caller's fault, and only
+// "error" means something is wrong with us.
+func outcomeFor(err error) string {
+	switch {
+	case err == nil:
+		return "won"
+	case errors.Is(err, booking.ErrSeatTaken):
+		return "conflict"
+	case errors.Is(err, booking.ErrInvalidRequest),
+		errors.Is(err, booking.ErrSeatNotFound),
+		errors.Is(err, booking.ErrUserNotFound),
+		errors.Is(err, booking.ErrEventNotFound):
+		return "rejected"
+	case errors.Is(err, context.Canceled):
+		return "abandoned"
+	default:
+		return "error"
+	}
+}
+
 func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: "+format, append([]any{booking.ErrInvalidRequest}, args...)...)
 }
@@ -39,6 +60,8 @@ func (s *Server) fail(w http.ResponseWriter, r *http.Request, err error) {
 		status, code = http.StatusNotFound, "user_not_found"
 	case errors.Is(err, booking.ErrBookingNotFound):
 		status, code = http.StatusNotFound, "booking_not_found"
+	case errors.Is(err, booking.ErrBookingNotHeld):
+		status, code = http.StatusConflict, "booking_not_held"
 	}
 
 	message := err.Error()

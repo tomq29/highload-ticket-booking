@@ -42,10 +42,13 @@ type Booking struct {
 }
 
 type Request struct {
-	EventID int64
-	SeatID  int64
-	UserID  int64
+	EventID        int64
+	SeatID         int64
+	UserID         int64
+	IdempotencyKey string
 }
+
+const maxIdempotencyKey = 255
 
 func (r Request) Validate() error {
 	switch {
@@ -55,8 +58,17 @@ func (r Request) Validate() error {
 		return fmt.Errorf("%w: seat_id must be positive", ErrInvalidRequest)
 	case r.UserID <= 0:
 		return fmt.Errorf("%w: user_id must be positive", ErrInvalidRequest)
+	case len(r.IdempotencyKey) > maxIdempotencyKey:
+		return fmt.Errorf("%w: idempotency key is longer than %d bytes", ErrInvalidRequest, maxIdempotencyKey)
 	}
 	return nil
+}
+
+// Result reports whether the booking was made now or is the one an earlier
+// request with the same idempotency key already made.
+type Result struct {
+	Booking  Booking
+	Replayed bool
 }
 
 var (
@@ -65,5 +77,6 @@ var (
 	ErrSeatNotFound    = errors.New("seat not found")
 	ErrUserNotFound    = errors.New("user not found")
 	ErrBookingNotFound = errors.New("booking not found")
+	ErrBookingNotHeld  = errors.New("booking is no longer held")
 	ErrSeatTaken       = errors.New("seat is already taken")
 )
