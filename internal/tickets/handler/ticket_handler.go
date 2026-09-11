@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"highload/internal/tickets"
+	"github.com/tomq29/highload-ticket-booking/internal/tickets"
 	"net/http"
 )
 

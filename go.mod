@@ -1,4 +1,4 @@
-module highload
+module github.com/tomq29/highload-ticket-booking
 
 go 1.25.4
 

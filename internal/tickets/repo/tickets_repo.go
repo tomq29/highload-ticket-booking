@@ -2,8 +2,8 @@ package repo
 
 import (
 	"context"
-	"highload/internal/seats"
-	"highload/internal/tickets"
+	"github.com/tomq29/highload-ticket-booking/internal/seats"
+	"github.com/tomq29/highload-ticket-booking/internal/tickets"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

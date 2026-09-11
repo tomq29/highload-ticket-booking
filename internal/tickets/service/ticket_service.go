@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"highload/internal/tickets"
+	"github.com/tomq29/highload-ticket-booking/internal/tickets"
 )
 
 type repo interface {
