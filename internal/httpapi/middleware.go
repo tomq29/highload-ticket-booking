@@ -7,32 +7,39 @@ import (
 	"time"
 )
 
-// Successful requests are logged at debug: under a load test the access log is
-// the first thing to become the bottleneck, and the interesting lines are the
-// ones that failed.
-func withLogging(log *slog.Logger, next http.Handler) http.Handler {
+// wrap is applied per route so that both the log line and the latency
+// histogram can name the route without deriving it from the URL, which would
+// put an unbounded number of paths into the metric labels.
+//
+// Successful requests log at debug: at load-test rates the access log is the
+// first thing to become the bottleneck, and the interesting lines are the ones
+// that failed.
+func (s *Server) wrap(route string, next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		started := time.Now()
 		rec := &recorder{ResponseWriter: w, status: http.StatusOK}
 
+		s.metrics.Started()
 		defer func() {
+			s.metrics.Done()
+
 			if v := recover(); v != nil {
-				log.Error("panic in handler",
-					"method", r.Method, "path", r.URL.Path,
-					"panic", v, "stack", string(debug.Stack()))
+				s.log.Error("panic in handler",
+					"route", route, "panic", v, "stack", string(debug.Stack()))
 				if !rec.wrote {
-					http.Error(w, "internal error", http.StatusInternalServerError)
+					http.Error(rec, "internal error", http.StatusInternalServerError)
 				}
 			}
 
-			log.Log(r.Context(), levelFor(rec.status), "request",
-				"method", r.Method,
-				"path", r.URL.Path,
+			took := time.Since(started)
+			s.metrics.Observe(route, rec.status, took)
+			s.log.Log(r.Context(), levelFor(rec.status), "request",
+				"route", route,
 				"status", rec.status,
-				"duration_ms", time.Since(started).Milliseconds())
+				"duration_ms", took.Milliseconds())
 		}()
 
-		next.ServeHTTP(rec, r)
+		next(rec, r)
 	})
 }
 
