@@ -1,25 +1,12 @@
-# копирую с докеробраза голанг и помечаю его как билдер
-FROM golang:1.25-alpine AS builder
-
-# создаю рабочую папку для первого контейнера
-WORKDIR /app
-
-# копирую свои го мод и го сум. из дериктории где будет запускаться докерфайл
+FROM golang:1.25-alpine AS build
+WORKDIR /src
 COPY go.mod go.sum ./
-
-# запускаю команду чтобы копирнуть все зависимости
 RUN go mod download
-
 COPY . .
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api
 
-RUN go build -o app ./cmd/highload/main.go
-
-FROM alpine:latest
-
-WORKDIR /root/
-
-COPY --from=builder /app/app .
-
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=build /out/api /api
 EXPOSE 8080
-
-CMD [ "./app" ]
+USER nonroot:nonroot
+ENTRYPOINT ["/api"]
